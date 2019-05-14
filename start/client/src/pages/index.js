@@ -5,7 +5,7 @@ import Launch from './launch';
 import Launches from './launches';
 import Cart from './cart';
 import Profile from './profile';
-import { Footer, PageContainer } from '../components';
+import { PageContainer } from '../components';
 
 export default function Pages() {
   return (
@@ -18,7 +18,6 @@ export default function Pages() {
           <Profile path="profile" />
         </Router>
       </PageContainer>
-      <Footer />
     </Fragment>
   );
 }
