@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import gql from 'graphql-tag';
 
-import { LaunchTitle, Header, Button, Loading } from '../components';
+import { LaunchTile, Header, Button, Loading } from '../components';
 
 const GET_LAUNCHES = gql`
   query launchList($after: String) {
@@ -13,12 +13,13 @@ const GET_LAUNCHES = gql`
         id
         isBooked
         rocket {
-          id name
+          id
+          name
         }
-      }
-      mission {
-        name
-        missionPatch
+        mission {
+          name
+          missionPatch
+        }
       }
     }
   }
@@ -27,9 +28,9 @@ const GET_LAUNCHES = gql`
 export default function Launches() {
   return (
     <Query query={GET_LAUNCHES}>
-      {({ data, loading, error, fetchMore }) => {
-        if (loading) return < Loading />;
-        if (error) return <p> ERROR </p>;
+      {({data, loading, error, fetchMore }) => {
+        if(loading) return <Loading />;
+        if(error) return <p>Error</p>;
 
         return (
           <Fragment>
@@ -38,14 +39,43 @@ export default function Launches() {
               data.launches &&
               data.launches.launches &&
               data.launches.launches.map(launch => (
-                <LaunchTitle
+                <LaunchTile
                   key={launch.id}
                   launch={launch}
-              ))
-            }
+                />
+              ))}
+          {
+            data.launches &&
+            data.launches.hasMore && (
+              <Button
+                onClick={() => 
+                  fetchMore({
+                    variables: {
+                      after: data.launches.cursor,
+                    },
+                    updateQuery: (prev, { fetchMoreResult, ...rest}) => {
+                      if (!fetchMoreResult) return prev;
+                      return {
+                        ...fetchMoreResult,
+                        launches: {
+                          ...fetchMoreResult.launches,
+                          launches: [
+                            ...prev.launches.launches,
+                            ...fetchMoreResult.launches.launches,
+                          ],
+                        },
+                      };
+                    },
+                  })
+                }
+              >
+                Load More
+              </Button>
+            )
+          }
           </Fragment>
-        )
+        );
       }}
     </Query>
   );
-};
+}
